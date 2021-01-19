@@ -199,6 +199,24 @@ fn correct_sequence(S: &str) -> String {
     }
 }
 
+fn w_concat(S: &str) -> String {
+    let mut s_concat_two = S.to_string();
+    s_concat_two.push_str(&S);
+    s_concat_two
+}
+
+fn correct_sequence2(S: &str) -> String {
+    let mut s_concat_two = w_concat(S);
+    s_concat_two
+}
+
+#[test]
+fn test2_1() {
+    let input  = "aa{a(abc)cr";
+    let output = "aa{a(abc)craa{a(abc)cr";
+    assert_eq!(correct_sequence2(input), output);
+}
+
 #[test]
 fn test_10() {
     let input = "aa{a(abc)cr";
