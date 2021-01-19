@@ -109,6 +109,7 @@ fn correct_sequence(S: &str) -> String {
         println!("Current index {}", current_ind);
         current_ind = 0;
 
+        let mut cur_seq2 = String::from("");
         for (i, ch) in s_concat_two.chars().enumerate() {
             print!("{} - {}", i, ch);
                             println!("Current sequence {} ", cur_seq );
@@ -117,7 +118,7 @@ fn correct_sequence(S: &str) -> String {
             }
             if (ch.is_alphabetic()) {
                 println!("Char is alpahabetic");
-                cur_seq.push(ch);
+                cur_seq2.push(ch);
                 continue;
             }
             match ch {
@@ -156,45 +157,37 @@ fn correct_sequence(S: &str) -> String {
                             println!("Current sequence {} {}", cur_seq, brack.0);
                             // cur_seq = s_concat_two[brack.0..(s_concat_two.len())].to_string();
                             // cur_seq.push_str(&s_concat_two[0..(i + 1)]);
-                            cur_seq.push(ch);
+                            cur_seq2 = s_concat_two[0..(i + 1)].to_string();
+                            // cur_seq.push(ch);
                             println!("Current sequence {}", cur_seq);
                         } else {
                             break;
-                            current_ind = i + 1;
-                            println!("Incorrect sequence {}", ch);
-                            cur_seq.clear();
-                            stack_bracket.clear();
                         }
-                    } else {
-                        break;
                     }
                 }
                 '(' => {
-                    stack_bracket.push((current_ind, ch));
-                    current_ind = i + 1;
+                    stack_bracket.push((i, ch));
+                    // current_ind = i + 1;
                     // cur_seq.push(ch);
                 }
                 ')' => {
-                    if (!stack_bracket.is_empty()) {
+                    if !stack_bracket.is_empty() {
                         let brack = stack_bracket.pop().unwrap();
-                        if (brack.1 == '(') {
-                            cur_seq = s_concat_two[brack.0..(s_concat_two.len())].to_string();
-                            cur_seq.push_str(&s_concat_two[0..(i + 1)]);
+                        if brack.1 == '(' {
+                            // cur_seq = s_concat_two[brack.0..(s_concat_two.len())].to_string();
+                            // cur_seq2.push_str(&s_concat_two[0..(i + 1)]);
+                            cur_seq2 = s_concat_two[0..(i + 1)].to_string();
                             println!("Current sequence {}", cur_seq);
                         } else {
                             break;
-                            current_ind = i + 1;
-                            println!("Incorrect sequence {}", ch);
-                            cur_seq.clear();
-                            stack_bracket.clear();
                         }
-                    } else {
-                        break;
                     }
                 }
                 _ => println!("Not known symbol"),
             }
         }
+
+        cur_seq.push_str(&cur_seq2);
     }
     println!("Correct");
     out_string = cur_seq;
@@ -224,6 +217,34 @@ fn test_11() {
 fn test_111() {
     let input = "a}){({";
     let output = "({a})";
+    assert_eq!(correct_sequence(input), output);
+}
+
+#[test]
+fn test_112() {
+    let input = "{a}bc({c})}{";
+    let output = "Infinite";
+    assert_eq!(correct_sequence(input), output);
+}
+
+#[test]
+fn test_113() {
+    let input = "{a}";
+    let output = "Infinite";
+    assert_eq!(correct_sequence(input), output);
+}
+
+#[test]
+fn test_114() {
+    let input = ")(";
+    let output = "Infinite";
+    assert_eq!(correct_sequence(input), output);
+}
+
+#[test]
+fn test_115() {
+    let input = "{a}b(c({c})}{";
+    let output = "c({c})";
     assert_eq!(correct_sequence(input), output);
 }
 
@@ -265,8 +286,8 @@ fn test_empty() {
 /// first test
 #[test]
 fn test1() {
-    let input = "a}](){}(){";
-    let output = "(){}(){a}";
+    let input = "a}](){d}(){";
+    let output = "(){d}(){a}";
     assert_eq!(correct_sequence(input), output);
 }
 
