@@ -1,7 +1,5 @@
 fn correct_sequence(S: &str) -> String {
     let mut s_concat_two = S.to_string();
-    // s_concat_two.push_str(S);
-    // println!("Concat {}", s_concat_two);
 
     let mut out_string = String::from("");
     let mut cur_seq = String::from("");
@@ -206,16 +204,61 @@ fn w_concat(S: &str) -> String {
 }
 
 fn correct_sequence2(S: &str) -> String {
+    let out_len = S.len();
     let mut s_concat_two = w_concat(S);
-    s_concat_two
+    let mut sequence = "".to_string();
+    let mut cur_cor_seq = "".to_string();
+    let mut seq = "".to_string();
+
+    let mut stack_bracket: Vec<(usize, char)> = Vec::new();
+
+    for (i, ch) in s_concat_two.chars().enumerate() {
+        println!("{} {}", i, ch);
+        match ch {
+            '{' => {
+                println!("Output br");
+            },
+            '}' => {
+                println!("Close br");
+            },
+            _ => {
+                println!("Char is alphabetic");
+                cur_cor_seq = seq.clone();
+            },
+        }
+        if sequence.len() == out_len {
+            sequence = "Infinite".to_string();
+        }
+    }
+    sequence 
+}
+
+UINT16 var[4]={0x01,0x02,0x03,0x04};
+UINT32 x;
+x=*((INT32*)(&var[1]));0x002003
+
+#[test]
+fn test2_concat() {
+    let input  = "aa{a(abc)cr";
+    let output = "aa{a(abc)craa{a(abc)cr";
+    assert_eq!(w_concat(input), output);
 }
 
 #[test]
 fn test2_1() {
-    let input  = "aa{a(abc)cr";
-    let output = "aa{a(abc)craa{a(abc)cr";
+    let input = "{}";
+    let output = "{}";
     assert_eq!(correct_sequence2(input), output);
 }
+
+#[test]
+fn test2_2() {
+    let input = "a{b}c";
+    let output = "a{b}c";
+    assert_eq!(correct_sequence2(input), output);
+}
+
+
 
 #[test]
 fn test_10() {
