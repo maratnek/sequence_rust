@@ -44,20 +44,32 @@ fn correct_sequence(S: &str) -> String {
                             t_pr_seq = (br.0, i);
                         }
                         cur_seq = s_concat_two[t_pr_seq.0..(t_pr_seq.1 + 1)].to_string();
+                    } else {
+                        //clear all
+                        stack_br.clear();
+                        if !t_pr_symbol.is_empty() && cur_seq.len() < t_pr_symbol.len() {
+                            cur_seq = t_pr_symbol.clone();
+                        }
+                        t_pr_symbol.clear();
                     }
                 } else {
                     //clear all
                     stack_br.clear();
+                    if !t_pr_symbol.is_empty() && cur_seq.len() < t_pr_symbol.len() {
+                        cur_seq = t_pr_symbol.clone();
+                    }
+                    t_pr_symbol.clear();
                 }
             }
             _ => {
-                println!("Symbol");
                 if t_pr_seq.1 + 1 == i && t_pr_seq.1 != 0 {
                     t_pr_seq.1 = i;
+                    cur_seq = s_concat_two[t_pr_seq.0..(t_pr_seq.1 + 1)].to_string();
                 } else {
                     t_pr_symbol.push(ch);
                 }
-                cur_seq = s_concat_two[t_pr_seq.0..(t_pr_seq.1 + 1)].to_string();
+
+                println!("Symbol cur_seq {}", cur_seq);
             }
         }
         if cur_seq.len() == S.len() {
@@ -67,12 +79,21 @@ fn correct_sequence(S: &str) -> String {
             );
             return "Infinite".to_string();
         }
+        if i == S.len() && stack_br.is_empty() && t_pr_symbol.is_empty() {
+            break;
+        }
     }
 
     let l = t_pr_symbol.len();
-    if l != 0 {}
+    if l != 0 {
+        // if cur_seq.is_empty() {
+        //     cur_seq = t_pr_symbol.clone();
+        // }
+        println!("t_pr_symbol {}", t_pr_symbol);
+    }
     cur_seq
 }
+
 
 #[test]
 fn test9_seq() {
@@ -133,5 +154,5 @@ fn test2_seq() {
 
 #[test]
 fn test3_seq() {
-    assert_eq!(correct_sequence("bc}ha}kk"), "bc");
+    assert_eq!(correct_sequence("bc}ha}kk"), "kkbc");
 }
