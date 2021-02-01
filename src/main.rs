@@ -16,6 +16,7 @@ fn update_seq(cur_seq: &mut String, n_seq: &mut String) {
 
 fn correct_sequence(S: &str) -> String {
     println!("In: {}", S);
+    let mut todo_lamda_var = "lamda".to_string();
     let mut s_concat_two = w_concat(S);
     let mut cur_seq = String::from("");
     let mut t_pr_symbol = String::from("");
@@ -26,6 +27,7 @@ fn correct_sequence(S: &str) -> String {
             "{} : {} cur_seq: {}, pr_seq: {:?}",
             i, ch, cur_seq, t_pr_seq
         );
+        println!("Lamda var {} ", todo_lamda_var);
         match ch {
             '{' => {
                 let l = t_pr_symbol.len();
@@ -34,6 +36,11 @@ fn correct_sequence(S: &str) -> String {
                 println!("push");
             }
             '}' => {
+                let mut m_lamda_close = |close_char: char| { 
+                    todo_lamda_var.push(ch);
+                    println!("My lamda close char {}", close_char);
+                }; 
+                m_lamda_close(ch);
                 if !stack_br.is_empty() {
                     let br = stack_br.pop().unwrap();
                     println!("br {:?}", br);
