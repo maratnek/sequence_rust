@@ -1,201 +1,6 @@
-fn correct_sequence(S: &str) -> String {
-    let mut s_concat_two = S.to_string();
-
-    let mut out_string = String::from("");
-    let mut cur_seq = String::from("");
-    let mut v_sub_seq = vec![0; S.len()];
-    if (S.is_empty()) {
-        return "empty".to_string();
-    }
-    let mut current_ind = 0;
-    let mut start_ind = 0;
-    let mut end_ind = 0;
-    let mut stack_bracket: Vec<(usize, char)> = Vec::new();
-
-    for (i, ch) in s_concat_two.chars().enumerate() {
-        println!("Current sequence: {} ", cur_seq );
-        print!("{} - {}", i, ch);
-        if (ch.is_alphabetic()) {
-            println!("Char is alpahabetic");
-            cur_seq.push(ch);
-            continue;
-        }
-        match ch {
-            '[' => {
-                // stack_bracket.push((current_ind, ch));
-                stack_bracket.push((i, ch));
-                // current_ind = i + 1;
-                cur_seq.push(ch);
-            }
-            ']' => {
-                if (!stack_bracket.is_empty()) {
-                    let brack = stack_bracket.pop().unwrap();
-                    if (brack.1 == '[') {
-                        cur_seq = s_concat_two[brack.0..(i + 1)].to_string();
-                        println!("Current sequence {}", cur_seq);
-                    } else {
-                        current_ind = i + 1;
-                        println!("Incorrect sequence {}", ch);
-                        cur_seq.clear();
-                        stack_bracket.clear();
-                    }
-                } else {
-                    current_ind = i + 1;
-                    println!("Incorrect sequence {}", ch);
-                    cur_seq.clear();
-                    stack_bracket.clear();
-                }
-            }
-            '{' => {
-                // stack_bracket.push((current_ind, ch));
-                stack_bracket.push((i, ch));
-                // current_ind = i + 1;
-                cur_seq.push(ch);
-            }
-            '}' => {
-                if (!stack_bracket.is_empty()) {
-                    let brack = stack_bracket.pop().unwrap();
-                    if (brack.1 == '{') {
-                        // cur_seq = s_concat_two[brack.0..(i + 1)].to_string();
-                        cur_seq = s_concat_two[current_ind..(i + 1)].to_string();
-                        println!("Current sequence {}", cur_seq);
-                    } else {
-                        current_ind = i + 1;
-                        println!("Incorrect sequence {}", ch);
-                        cur_seq.clear();
-                        stack_bracket.clear();
-                    }
-                } else {
-                    current_ind = i + 1;
-                    println!("Incorrect sequence {}", ch);
-                    cur_seq.clear();
-                    stack_bracket.clear();
-                }
-            }
-            '(' => {
-                // stack_bracket.push((current_ind, ch));
-                stack_bracket.push((i, ch));
-                // current_ind = i + 1;
-                cur_seq.push(ch);
-            }
-            ')' => {
-                if (!stack_bracket.is_empty()) {
-                    let brack = stack_bracket.pop().unwrap();
-                    if (brack.1 == '(') {
-                        // cur_seq = s_concat_two[brack.0..(i + 1)].to_string();
-                        cur_seq = s_concat_two[current_ind..(i + 1)].to_string();
-                        println!("Current sequence {}", cur_seq);
-                    } else {
-                        current_ind = i + 1;
-                        println!("Incorrect sequence {}", ch);
-                        cur_seq.clear();
-                        stack_bracket.clear();
-                    }
-                } else {
-                    println!("Incorrect sequence {}", ch);
-                    current_ind = i + 1;
-                    cur_seq.clear();
-                    stack_bracket.clear();
-                }
-            }
-            _ => println!("Not known symbol"),
-        }
-    }
-    // try closure if it possible
-    if !stack_bracket.is_empty() {
-        println!("stack_bracket is not empty");
-        println!("Current index {}", current_ind);
-        current_ind = 0;
-
-        let mut cur_seq2 = String::from("");
-        for (i, ch) in s_concat_two.chars().enumerate() {
-            print!("{} - {}", i, ch);
-                            println!("Current sequence {} ", cur_seq );
-            if (!stack_bracket.is_empty() && stack_bracket[0].0 == i) {
-                break;
-            }
-            if (ch.is_alphabetic()) {
-                println!("Char is alpahabetic");
-                cur_seq2.push(ch);
-                continue;
-            }
-            match ch {
-                '[' => {
-                    stack_bracket.push((current_ind, ch));
-                    current_ind = i + 1;
-                    // cur_seq.push(ch);
-                }
-                ']' => {
-                    if (!stack_bracket.is_empty()) {
-                        let brack = stack_bracket.pop().unwrap();
-                        if (brack.1 == '[') {
-                            cur_seq = s_concat_two[brack.0..(s_concat_two.len())].to_string();
-                            cur_seq.push_str(&s_concat_two[0..(i + 1)]);
-                            println!("Current sequence {}", cur_seq);
-                        } else {
-                            break;
-                            current_ind = i + 1;
-                            println!("Incorrect sequence {}", ch);
-                            cur_seq.clear();
-                            stack_bracket.clear();
-                        }
-                    } else {
-                        break;
-                    }
-                }
-                '{' => {
-                    stack_bracket.push((i, ch));
-                    // current_ind = i + 1;
-                    // cur_seq.push(ch);
-                }
-                '}' => {
-                    if (!stack_bracket.is_empty()) {
-                        let brack = stack_bracket.pop().unwrap();
-                        if (brack.1 == '{') {
-                            println!("Current sequence {} {}", cur_seq, brack.0);
-                            // cur_seq = s_concat_two[brack.0..(s_concat_two.len())].to_string();
-                            // cur_seq.push_str(&s_concat_two[0..(i + 1)]);
-                            cur_seq2 = s_concat_two[0..(i + 1)].to_string();
-                            // cur_seq.push(ch);
-                            println!("Current sequence {}", cur_seq);
-                        } else {
-                            break;
-                        }
-                    }
-                }
-                '(' => {
-                    stack_bracket.push((i, ch));
-                    // current_ind = i + 1;
-                    // cur_seq.push(ch);
-                }
-                ')' => {
-                    if !stack_bracket.is_empty() {
-                        let brack = stack_bracket.pop().unwrap();
-                        if brack.1 == '(' {
-                            // cur_seq = s_concat_two[brack.0..(s_concat_two.len())].to_string();
-                            // cur_seq2.push_str(&s_concat_two[0..(i + 1)]);
-                            cur_seq2 = s_concat_two[0..(i + 1)].to_string();
-                            println!("Current sequence {}", cur_seq);
-                        } else {
-                            break;
-                        }
-                    }
-                }
-                _ => println!("Not known symbol"),
-            }
-        }
-
-        cur_seq.push_str(&cur_seq2);
-    }
-    println!("Correct");
-    out_string = cur_seq;
-    println!("Output string {}", out_string);
-    if (out_string.len() == S.len()) {
-        "Infinite".to_string()
-    } else {
-        out_string
-    }
-}
+///
+/// considering that input data is correct
+/// considering symbol is little sequence
 
 fn w_concat(S: &str) -> String {
     let mut s_concat_two = S.to_string();
@@ -203,165 +8,130 @@ fn w_concat(S: &str) -> String {
     s_concat_two
 }
 
-fn correct_sequence2(S: &str) -> String {
-    let out_len = S.len();
+fn update_seq(cur_seq: &mut String, n_seq: &mut String) {
+    if cur_seq.len() < n_seq.len() {
+        *cur_seq = n_seq.clone();
+    }
+}
+
+fn correct_sequence(S: &str) -> String {
+    println!("In: {}", S);
     let mut s_concat_two = w_concat(S);
-    let mut sequence = "".to_string();
-    let mut cur_cor_seq = "".to_string();
-    let mut seq = "".to_string();
-
-    let mut stack_bracket: Vec<(usize, char)> = Vec::new();
-
+    let mut cur_seq = String::from("");
+    let mut t_pr_symbol = String::from("");
+    let mut t_pr_seq: (usize, usize) = (0, 0);
+    let mut stack_br: Vec<(usize, char)> = Vec::new();
     for (i, ch) in s_concat_two.chars().enumerate() {
-        println!("{} {}", i, ch);
+        println!(
+            "{} : {} cur_seq: {}, pr_seq: {:?}",
+            i, ch, cur_seq, t_pr_seq
+        );
         match ch {
             '{' => {
-                println!("Output br");
-            },
+                let l = t_pr_symbol.len();
+                t_pr_symbol.clear();
+                stack_br.push((i - l, ch));
+                println!("push");
+            }
             '}' => {
-                println!("Close br");
-            },
+                if !stack_br.is_empty() {
+                    let br = stack_br.pop().unwrap();
+                    println!("br {:?}", br);
+                    if br.1 == '{' {
+                        if t_pr_seq.1 + 1 == br.0 && t_pr_seq.1 != 0 {
+                            t_pr_seq.1 = i;
+                        } else {
+                            t_pr_seq = (br.0, i);
+                        }
+                        cur_seq = s_concat_two[t_pr_seq.0..(t_pr_seq.1 + 1)].to_string();
+                    }
+                } else {
+                    //clear all
+                    stack_br.clear();
+                }
+            }
             _ => {
-                println!("Char is alphabetic");
-                cur_cor_seq = seq.clone();
-            },
+                println!("Symbol");
+                if t_pr_seq.1 + 1 == i && t_pr_seq.1 != 0 {
+                    t_pr_seq.1 = i;
+                } else {
+                    t_pr_symbol.push(ch);
+                }
+                cur_seq = s_concat_two[t_pr_seq.0..(t_pr_seq.1 + 1)].to_string();
+            }
         }
-        if sequence.len() == out_len {
-            sequence = "Infinite".to_string();
-        }
-    }
-    sequence 
-}
-
-UINT16 var[4]={0x01,0x02,0x03,0x04};
-UINT32 x;
-x=*((INT32*)(&var[1]));0x002003
-
-#[test]
-fn test2_concat() {
-    let input  = "aa{a(abc)cr";
-    let output = "aa{a(abc)craa{a(abc)cr";
-    assert_eq!(w_concat(input), output);
-}
-
-#[test]
-fn test2_1() {
-    let input = "{}";
-    let output = "{}";
-    assert_eq!(correct_sequence2(input), output);
-}
-
-#[test]
-fn test2_2() {
-    let input = "a{b}c";
-    let output = "a{b}c";
-    assert_eq!(correct_sequence2(input), output);
-}
-
-
-
-#[test]
-fn test_10() {
-    let input = "aa{a(abc)cr";
-    let output = "a(abc)cr";
-    assert_eq!(correct_sequence(input), output);
-}
-
-#[test]
-fn test_11() {
-    let input = "a})({";
-    let output = "Infinite";
-    assert_eq!(correct_sequence(input), output);
-}
-
-#[test]
-fn test_111() {
-    let input = "a}){({";
-    let output = "({a})";
-    assert_eq!(correct_sequence(input), output);
-}
-
-#[test]
-fn test_112() {
-    let input = "{a}bc({c})}{";
-    let output = "Infinite";
-    assert_eq!(correct_sequence(input), output);
-}
-
-#[test]
-fn test_113() {
-    let input = "{a}";
-    let output = "Infinite";
-    assert_eq!(correct_sequence(input), output);
-}
-
-#[test]
-fn test_114() {
-    let input = ")(";
-    let output = "Infinite";
-    assert_eq!(correct_sequence(input), output);
-}
-
-#[test]
-fn test_115() {
-    let input = "{a}b(c({c})}{";
-    let output = "c({c})";
-    assert_eq!(correct_sequence(input), output);
-}
-
-#[test]
-fn test_stack() {
-    let mut stack: Vec<char> = Vec::new();
-    stack.push('[');
-    stack.push('(');
-    stack.push('{');
-    stack.pop();
-    if (!stack.is_empty()) {
-        let a = stack.pop().unwrap();
-        for elem in stack {
-            println!("Stack pop {:?}", elem);
+        if cur_seq.len() == S.len() {
+            println!(
+                "{} : {} cur_seq: {}, pr_seq: {:?}",
+                i, ch, cur_seq, t_pr_seq
+            );
+            return "Infinite".to_string();
         }
     }
+
+    let l = t_pr_symbol.len();
+    if l != 0 {}
+    cur_seq
 }
 
-// if exist pair for one sequence it's infinite
-// if not exist pair for at least one ''symbol find sequence
 #[test]
-fn test_12() {
-    let input = "a}{(})[][[";
-    let output = "[]";
-    assert_eq!(correct_sequence(input), output);
+fn test9_seq() {
+    assert_eq!(correct_sequence("{{}{}}"), "Infinite");
+}
+
+#[test]
+fn test8_seq() {
+    assert_eq!(correct_sequence("{}{}"), "Infinite");
+}
+
+#[test]
+fn test7_seq() {
+    assert_eq!(correct_sequence("{}}"), "{}");
+}
+
+#[test]
+fn test6_seq() {
+    assert_eq!(correct_sequence("{{}"), "{}");
+}
+
+#[test]
+fn test5_seq() {
+    assert_eq!(correct_sequence("{}"), "Infinite");
+}
+
+#[test]
+fn test4_seq() {
+    assert_eq!(correct_sequence("a{a}c{"), "a{a}c");
 }
 
 fn main() {
-    println!("Data: {}", correct_sequence("abc{}"));
+    let mut cur_seq = String::from("cur seq");
+    let mut n_seq = String::from("more seq");
+    update_seq(&mut cur_seq, &mut n_seq);
+    println!("Current seq: {}", cur_seq);
 }
 
 #[test]
-fn test_empty() {
-    let input = "";
-    let output = "empty";
-    assert_eq!(correct_sequence(input), output);
-}
-
-/// first test
-#[test]
-fn test1() {
-    let input = "a}](){d}(){";
-    let output = "(){d}(){a}";
-    assert_eq!(correct_sequence(input), output);
+fn test1_concat() {
+    let input = "{}";
+    let output = "{}{}";
+    assert_eq!(w_concat(input), output);
+    let input = "{}";
+    let output = "{}{";
+    assert_ne!(w_concat(input), output);
 }
 
 #[test]
-fn test2() {
-    let input = "sh(dh)}";
-    let output = "sh(dh)";
-    assert_eq!(correct_sequence(input), output);
+fn test1_seq() {
+    assert_eq!(correct_sequence("{a}"), "Infinite");
 }
 
 #[test]
-fn test3() {
-    let input = "]h({hdb}b)[";
-    let output = "Infinite";
-    assert_eq!(correct_sequence(input), output);
+fn test2_seq() {
+    assert_eq!(correct_sequence("}a}"), "a");
+}
+
+#[test]
+fn test3_seq() {
+    assert_eq!(correct_sequence("bc}ha}kk"), "bc");
 }
