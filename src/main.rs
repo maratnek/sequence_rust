@@ -40,6 +40,7 @@ fn correct_sequence(S: &str) -> String {
                     if br.1 == '{' {
                         if t_pr_seq.1 + 1 == br.0 && t_pr_seq.1 != 0 {
                             t_pr_seq.1 = i;
+                            println!("t_pr_seq {}", i);
                         } else {
                             t_pr_seq = (br.0, i);
                         }
@@ -67,7 +68,9 @@ fn correct_sequence(S: &str) -> String {
             _ => {
                 if t_pr_seq.1 + 1 == i && t_pr_seq.1 != 0 {
                     t_pr_seq.1 = i;
+                    println!("t_pr_seq {}", i);
                     cur_seq = s_concat_two[t_pr_seq.0..(t_pr_seq.1 + 1)].to_string();
+                    t_pr_symbol.clear();
                 } else {
                     t_pr_symbol.push(ch);
                 }
@@ -82,7 +85,7 @@ fn correct_sequence(S: &str) -> String {
             );
             return "Infinite".to_string();
         }
-        if i == S.len() && stack_br.is_empty() && t_pr_symbol.is_empty() {
+        if i >= S.len() && stack_br.is_empty() && t_pr_symbol.is_empty() {
             break;
         }
     }
@@ -95,6 +98,21 @@ fn correct_sequence(S: &str) -> String {
         println!("t_pr_symbol {}", t_pr_symbol);
     }
     cur_seq
+}
+
+#[test]
+fn test19_seq() {
+    assert_eq!(correct_sequence("}{bc}}k}ab{}}c{d}y{}}da{{b}{}}}kc{{z"), "kc{{z}{bc}}k");
+}
+
+#[test]
+fn test18_seq() {
+    assert_eq!(correct_sequence("}}k}ab{c{d}c}da}kc{"), "ab{c{d}c}da");
+}
+
+#[test]
+fn test17_seq() {
+    assert_eq!(correct_sequence("abc{dda}kc{"), "abc{dda}kc");
 }
 
 #[test]
