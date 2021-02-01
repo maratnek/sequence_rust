@@ -43,7 +43,10 @@ fn correct_sequence(S: &str) -> String {
                         } else {
                             t_pr_seq = (br.0, i);
                         }
-                        cur_seq = s_concat_two[t_pr_seq.0..(t_pr_seq.1 + 1)].to_string();
+                        let t_cur_seq = s_concat_two[t_pr_seq.0..(t_pr_seq.1 + 1)].to_string();
+                        if cur_seq.len() < t_cur_seq.len() {
+                            cur_seq = t_cur_seq;
+                        }
                     } else {
                         //clear all
                         stack_br.clear();
@@ -72,7 +75,7 @@ fn correct_sequence(S: &str) -> String {
                 println!("Symbol cur_seq {}", cur_seq);
             }
         }
-        if cur_seq.len() == S.len() {
+        if cur_seq.len() == S.len() || t_pr_symbol.len() == S.len() {
             println!(
                 "{} : {} cur_seq: {}, pr_seq: {:?}",
                 i, ch, cur_seq, t_pr_seq
@@ -86,14 +89,48 @@ fn correct_sequence(S: &str) -> String {
 
     let l = t_pr_symbol.len();
     if l != 0 {
-        // if cur_seq.is_empty() {
-        //     cur_seq = t_pr_symbol.clone();
-        // }
+        if cur_seq.is_empty() {
+            cur_seq = t_pr_symbol.clone();
+        }
         println!("t_pr_symbol {}", t_pr_symbol);
     }
     cur_seq
 }
 
+#[test]
+fn test16_seq() {
+    assert_eq!(correct_sequence("zzz"), "Infinite");
+}
+#[test]
+fn test15_seq() {
+    assert_eq!(correct_sequence("{"), "");
+}
+
+#[test]
+fn test14_seq() {
+    assert_eq!(correct_sequence("}"), "");
+}
+
+#[test]
+fn test13_seq() {
+    assert_eq!(correct_sequence("}c}bc{k{d"), "Infinite");
+}
+
+
+#[test]
+fn test12_seq() {
+    assert_eq!(correct_sequence("}}}bc{{"), "bc{{}}");
+}
+
+#[test]
+fn test11_seq() {
+    assert_eq!(correct_sequence("{a{}}}}}{}}"), "{a{}}");
+}
+
+#[test]
+fn test10_seq() {
+    assert_eq!(correct_sequence("{a{}}{}}"), "{a{}}{}");
+}
 
 #[test]
 fn test9_seq() {
