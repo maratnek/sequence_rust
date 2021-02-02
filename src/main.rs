@@ -16,52 +16,33 @@ fn update_seq(cur_seq: &mut String, n_seq: &mut String) {
 
 fn correct_sequence(S: &str) -> String {
     println!("In: {}", S);
-    let mut todo_lamda_var = "lamda".to_string();
     let mut s_concat_two = w_concat(S);
     let mut cur_seq = String::from("");
     let mut t_pr_symbol = String::from("");
     let mut t_pr_seq: (usize, usize) = (0, 0);
     let mut stack_br: Vec<(usize, char)> = Vec::new();
+
     for (i, ch) in s_concat_two.chars().enumerate() {
         println!(
             "{} : {} cur_seq: {}, pr_seq: {:?}",
             i, ch, cur_seq, t_pr_seq
         );
-        println!("Lamda var {} ", todo_lamda_var);
-        match ch {
-            '{' => {
-                let l = t_pr_symbol.len();
-                t_pr_symbol.clear();
-                stack_br.push((i - l, ch));
-                println!("push");
-            }
-            '}' => {
-                let mut m_lamda_close = |close_char: char| { 
-                    todo_lamda_var.push(ch);
-                    println!("My lamda close char {}", close_char);
-                }; 
-                m_lamda_close(ch);
-                if !stack_br.is_empty() {
-                    let br = stack_br.pop().unwrap();
-                    println!("br {:?}", br);
-                    if br.1 == '{' {
-                        if t_pr_seq.1 + 1 == br.0 && t_pr_seq.1 != 0 {
-                            t_pr_seq.1 = i;
-                            println!("t_pr_seq {}", i);
-                        } else {
-                            t_pr_seq = (br.0, i);
-                        }
-                        let t_cur_seq = s_concat_two[t_pr_seq.0..(t_pr_seq.1 + 1)].to_string();
-                        if cur_seq.len() < t_cur_seq.len() {
-                            cur_seq = t_cur_seq;
-                        }
+
+        let mut m_lamda_close = |i: usize, ch: char, output_char: char| {
+            println!("My lamda chars {} {}", output_char, ch);
+            if !stack_br.is_empty() {
+                let br = stack_br.pop().unwrap();
+                println!("br {:?}", br);
+                if br.1 == output_char {
+                    if t_pr_seq.1 + 1 == br.0 && t_pr_seq.1 != 0 {
+                        t_pr_seq.1 = i;
+                        println!("t_pr_seq {}", i);
                     } else {
-                        //clear all
-                        stack_br.clear();
-                        if !t_pr_symbol.is_empty() && cur_seq.len() < t_pr_symbol.len() {
-                            cur_seq = t_pr_symbol.clone();
-                        }
-                        t_pr_symbol.clear();
+                        t_pr_seq = (br.0, i);
+                    }
+                    let t_cur_seq = s_concat_two[t_pr_seq.0..(t_pr_seq.1 + 1)].to_string();
+                    if cur_seq.len() < t_cur_seq.len() {
+                        cur_seq = t_cur_seq;
                     }
                 } else {
                     //clear all
@@ -71,6 +52,36 @@ fn correct_sequence(S: &str) -> String {
                     }
                     t_pr_symbol.clear();
                 }
+            } else {
+                //clear all
+                stack_br.clear();
+                if !t_pr_symbol.is_empty() && cur_seq.len() < t_pr_symbol.len() {
+                    cur_seq = t_pr_symbol.clone();
+                }
+                t_pr_symbol.clear();
+            }
+        };
+
+        // println!("Lamda var {} ", todo_lamda_var);
+        match ch {
+            '(' | '{' | '[' => {
+                let mut m_lamda_open = || {
+                    println!("My lamda open char {}", ch);
+                    let l = t_pr_symbol.len();
+                    t_pr_symbol.clear();
+                    stack_br.push((i - l, ch));
+                    println!("push");
+                };
+                m_lamda_open();
+            }
+            ']' => {
+                m_lamda_close(i, ch, '[');
+            }
+            ')' => {
+                m_lamda_close(i, ch, '(');
+            }
+            '}' => {
+                m_lamda_close(i, ch, '{');
             }
             _ => {
                 if t_pr_seq.1 + 1 == i && t_pr_seq.1 != 0 {
@@ -108,8 +119,45 @@ fn correct_sequence(S: &str) -> String {
 }
 
 #[test]
+fn test24_seq() {
+    assert_eq!(correct_sequence("[[](){}"), "[](){}");
+}
+
+#[test]
+fn test23_seq() {
+    assert_eq!(
+        correct_sequence("}[bc])k)ab{})c(d)y())da([b]()))kc({z"),
+        "kc({z}[bc])k"
+    );
+}
+
+#[test]
+fn test22_seq() {
+    assert_eq!(correct_sequence("(){}"), "Infinite");
+}
+
+#[test]
+fn test21_seq() {
+    assert_eq!(
+        correct_sequence("}(bc))k)ab{})c(d)y())da((b)()))kc({z"),
+        "kc({z}(bc))k"
+    );
+}
+
+#[test]
+fn test20_seq() {
+    assert_eq!(
+        correct_sequence(")(bc))k)ab())c(d)y())da((b)()))kc((z"),
+        "kc((z)(bc))k"
+    );
+}
+
+#[test]
 fn test19_seq() {
-    assert_eq!(correct_sequence("}{bc}}k}ab{}}c{d}y{}}da{{b}{}}}kc{{z"), "kc{{z}{bc}}k");
+    assert_eq!(
+        correct_sequence("}{bc}}k}ab{}}c{d}y{}}da{{b}{}}}kc{{z"),
+        "kc{{z}{bc}}k"
+    );
 }
 
 #[test]
@@ -140,7 +188,6 @@ fn test14_seq() {
 fn test13_seq() {
     assert_eq!(correct_sequence("}c}bc{k{d"), "Infinite");
 }
-
 
 #[test]
 fn test12_seq() {
