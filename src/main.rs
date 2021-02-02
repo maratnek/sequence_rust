@@ -234,11 +234,19 @@ fn test4_seq() {
     assert_eq!(correct_sequence("a{a}c{"), "a{a}c");
 }
 
-fn main() {
-    let mut cur_seq = String::from("cur seq");
-    let mut n_seq = String::from("more seq");
-    update_seq(&mut cur_seq, &mut n_seq);
-    println!("Current seq: {}", cur_seq);
+#[test]
+fn test3_seq() {
+    assert_eq!(correct_sequence("bc}ha}kk"), "kkbc");
+}
+
+#[test]
+fn test2_seq() {
+    assert_eq!(correct_sequence("}a}"), "a");
+}
+
+#[test]
+fn test1_seq() {
+    assert_eq!(correct_sequence("{a}"), "Infinite");
 }
 
 #[test]
@@ -251,17 +259,6 @@ fn test1_concat() {
     assert_ne!(w_concat(input), output);
 }
 
-#[test]
-fn test1_seq() {
-    assert_eq!(correct_sequence("{a}"), "Infinite");
-}
-
-#[test]
-fn test2_seq() {
-    assert_eq!(correct_sequence("}a}"), "a");
-}
-
-#[test]
-fn test3_seq() {
-    assert_eq!(correct_sequence("bc}ha}kk"), "kkbc");
+fn main() {
+    println!("Sequence ");
 }
