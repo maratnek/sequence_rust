@@ -1,46 +1,54 @@
 ///
 /// considering that input data is correct
 /// considering symbol is little sequence
+use log::{info, debug};
 
-fn w_concat(S: &str) -> String {
-    let mut s_concat_two = S.to_string();
-    s_concat_two.push_str(&S);
+struct Sequence {
+    s: String
+}
+
+fn w_concat(s: &str) -> String {
+    let mut s_concat_two = s.to_string();
+    s_concat_two.push_str(&s);
     s_concat_two
 }
 
-fn update_seq(cur_seq: &mut String, n_seq: &mut String) {
-    if cur_seq.len() < n_seq.len() {
-        *cur_seq = n_seq.clone();
-    }
+#[derive(Copy, Clone)]
+struct SymbolPosition {
+    pos: usize,
+    ch: char
 }
 
-fn correct_sequence(S: &str) -> String {
-    println!("In: {}", S);
-    let mut s_concat_two = w_concat(S);
+#[derive(Debug)]
+struct SequenceDest {
+    start: usize,
+    end: usize,
+}
+
+fn correct_sequence(s: &str) -> String {
+    info!("In: {}", s);
+    let s_concat_two = w_concat(s);
     let mut cur_seq = String::from("");
     let mut t_pr_symbol = String::from("");
-    let mut t_pr_seq: (usize, usize) = (0, 0);
-    let mut stack_br: Vec<(usize, char)> = Vec::new();
+    let mut t_pr_seq = SequenceDest{start: 0, end: 0};
+    let mut stack_br: Vec<SymbolPosition> = Vec::new();
 
     for (i, ch) in s_concat_two.chars().enumerate() {
-        println!(
+        info!(
             "{} : {} cur_seq: {}, pr_seq: {:?}",
             i, ch, cur_seq, t_pr_seq
         );
 
-        let mut m_lamda_close = |i: usize, ch: char, output_char: char| {
-            println!("My lamda chars {} {}", output_char, ch);
-            if !stack_br.is_empty() {
-                let br = stack_br.pop().unwrap();
-                println!("br {:?}", br);
-                if br.1 == output_char {
-                    if t_pr_seq.1 + 1 == br.0 && t_pr_seq.1 != 0 {
-                        t_pr_seq.1 = i;
-                        println!("t_pr_seq {}", i);
+        let mut m_lamda_close = |i: usize, output_char: char| {
+                let optional = stack_br.pop();
+                if !optional.is_none() && optional.unwrap().ch == output_char {
+                    let br = optional.unwrap();
+                    if t_pr_seq.end + 1 == br.pos && t_pr_seq.end != 0 {
+                        t_pr_seq.end = i;
                     } else {
-                        t_pr_seq = (br.0, i);
+                        t_pr_seq = SequenceDest{start: br.pos, end: i};
                     }
-                    let t_cur_seq = s_concat_two[t_pr_seq.0..(t_pr_seq.1 + 1)].to_string();
+                    let t_cur_seq = s_concat_two[t_pr_seq.start..(t_pr_seq.end + 1)].to_string();
                     if cur_seq.len() < t_cur_seq.len() {
                         cur_seq = t_cur_seq;
                     }
@@ -52,71 +60,58 @@ fn correct_sequence(S: &str) -> String {
                     }
                     t_pr_symbol.clear();
                 }
-            } else {
-                //clear all
-                stack_br.clear();
-                if !t_pr_symbol.is_empty() && cur_seq.len() < t_pr_symbol.len() {
-                    cur_seq = t_pr_symbol.clone();
-                }
-                t_pr_symbol.clear();
-            }
         };
 
-        // println!("Lamda var {} ", todo_lamda_var);
         match ch {
             '(' | '{' | '[' => {
-                let mut m_lamda_open = || {
-                    println!("My lamda open char {}", ch);
-                    let l = t_pr_symbol.len();
-                    t_pr_symbol.clear();
-                    stack_br.push((i - l, ch));
-                    println!("push");
-                };
-                m_lamda_open();
+                stack_br.push(SymbolPosition{
+                    pos: i - t_pr_symbol.len(), 
+                    ch: ch});
+                t_pr_symbol.clear();
             }
             ']' => {
-                m_lamda_close(i, ch, '[');
+                m_lamda_close(i, '[');
             }
             ')' => {
-                m_lamda_close(i, ch, '(');
+                m_lamda_close(i, '(');
             }
             '}' => {
-                m_lamda_close(i, ch, '{');
+                m_lamda_close(i, '{');
             }
             _ => {
-                if t_pr_seq.1 + 1 == i && t_pr_seq.1 != 0 {
-                    t_pr_seq.1 = i;
-                    println!("t_pr_seq {}", i);
-                    cur_seq = s_concat_two[t_pr_seq.0..(t_pr_seq.1 + 1)].to_string();
+                if t_pr_seq.end + 1 == i && t_pr_seq.end != 0 {
+                    info!("t_pr_seq {}", i);
+                    t_pr_seq.end = i;
+                    cur_seq = s_concat_two[t_pr_seq.start..(t_pr_seq.end + 1)].to_string();
                     t_pr_symbol.clear();
                 } else {
                     t_pr_symbol.push(ch);
                 }
 
-                println!("Symbol cur_seq {}", cur_seq);
+                info!("Symbol cur_seq {}", cur_seq);
             }
         }
-        if cur_seq.len() == S.len() || t_pr_symbol.len() == S.len() {
-            println!(
-                "{} : {} cur_seq: {}, pr_seq: {:?}",
-                i, ch, cur_seq, t_pr_seq
-            );
+        if cur_seq.len() == s.len() || t_pr_symbol.len() == s.len() {
             return "Infinite".to_string();
         }
-        if i >= S.len() && stack_br.is_empty() && t_pr_symbol.is_empty() {
+        if i >= s.len() && stack_br.is_empty() && t_pr_symbol.is_empty() {
             break;
         }
     }
 
-    let l = t_pr_symbol.len();
-    if l != 0 {
+    if t_pr_symbol.len() != 0 {
         if cur_seq.is_empty() {
-            cur_seq = t_pr_symbol.clone();
+            cur_seq = t_pr_symbol;
         }
-        println!("t_pr_symbol {}", t_pr_symbol);
     }
     cur_seq
 }
+
+#[test]
+fn test25_seq() {
+    assert_eq!(correct_sequence("[[]((]){}"), "[]");
+}
+
 
 #[test]
 fn test24_seq() {
@@ -260,5 +255,5 @@ fn test1_concat() {
 }
 
 fn main() {
-    println!("Sequence ");
+    println!("Sequence {} === kc({{z}}[bc])k",correct_sequence("}[bc])k)ab[])c(d)y())da((b)()))kc({z"));
 }
