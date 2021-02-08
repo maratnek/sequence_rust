@@ -1,10 +1,96 @@
 ///
 /// considering that input data is correct
 /// considering symbol is little sequence
-use log::{info, debug};
+use log::{debug, info};
 
 struct Sequence {
-    s: String
+    s: String,
+}
+
+impl Sequence {
+    fn new(s: String) -> Sequence {
+        Self { s }
+    }
+
+    fn get_correct_sequence(&self) -> String {
+        let s_concat_two = w_concat(&self.s);
+        let mut current_sequnce = String::from("");
+        let mut previous_symbol = String::from("");
+        let mut previous_sequnce = SequenceDest { start: 0, end: 0 };
+        let mut stack_br: Vec<SymbolPosition> = Vec::new();
+
+        for (i, ch) in s_concat_two.chars().enumerate() {
+
+            let mut m_lamda_close = |i: usize, output_char: char| {
+                let optional = stack_br.pop();
+                if !optional.is_none() && optional.unwrap().ch == output_char {
+                    let br = optional.unwrap();
+                    if previous_sequnce.end + 1 == br.pos && previous_sequnce.end != 0 {
+                        previous_sequnce.end = i;
+                    } else {
+                        previous_sequnce = SequenceDest {
+                            start: br.pos,
+                            end: i,
+                        };
+                    }
+                    let previous_seq_len = previous_sequnce.end + 1 - previous_sequnce.start;
+                    if current_sequnce.len() < previous_seq_len {
+                        current_sequnce = s_concat_two[previous_sequnce.start..(previous_sequnce.end + 1)].to_string();
+                    }
+                } else {
+                    //clear all
+                    stack_br.clear();
+                    if !previous_symbol.is_empty() && current_sequnce.len() < previous_symbol.len() {
+                        current_sequnce = previous_symbol.clone();
+                    }
+                    previous_symbol.clear();
+                }
+            };
+
+            match ch {
+                '(' | '{' | '[' => {
+                    stack_br.push(SymbolPosition {
+                        pos: i - previous_symbol.len(),
+                        ch: ch,
+                    });
+                    previous_symbol.clear();
+                }
+                ']' => {
+                    m_lamda_close(i, '[');
+                }
+                ')' => {
+                    m_lamda_close(i, '(');
+                }
+                '}' => {
+                    m_lamda_close(i, '{');
+                }
+                _ => {
+                    if previous_sequnce.end + 1 == i && previous_sequnce.end != 0 {
+                        info!("t_pr_seq {}", i);
+                        previous_sequnce.end = i;
+                        current_sequnce = s_concat_two[previous_sequnce.start..(previous_sequnce.end + 1)].to_string();
+                        previous_symbol.clear();
+                    } else {
+                        previous_symbol.push(ch);
+                    }
+
+                }
+            }
+            // return if found max possible sequence
+            if current_sequnce.len() == self.s.len() || previous_symbol.len() == self.s.len() {
+                return "Infinite".to_string();
+            }
+            if i >= self.s.len() && stack_br.is_empty() && previous_symbol.is_empty() {
+                break;
+            }
+        }
+
+        // symbol sequence if sequence not found
+        if previous_symbol.len() != 0 && current_sequnce.is_empty() {
+            current_sequnce = previous_symbol;
+        }
+        current_sequnce
+    }
 }
 
 fn w_concat(s: &str) -> String {
@@ -16,7 +102,7 @@ fn w_concat(s: &str) -> String {
 #[derive(Copy, Clone)]
 struct SymbolPosition {
     pos: usize,
-    ch: char
+    ch: char,
 }
 
 #[derive(Debug)]
@@ -27,91 +113,14 @@ struct SequenceDest {
 
 fn correct_sequence(s: &str) -> String {
     info!("In: {}", s);
-    let s_concat_two = w_concat(s);
-    let mut cur_seq = String::from("");
-    let mut t_pr_symbol = String::from("");
-    let mut t_pr_seq = SequenceDest{start: 0, end: 0};
-    let mut stack_br: Vec<SymbolPosition> = Vec::new();
-
-    for (i, ch) in s_concat_two.chars().enumerate() {
-        info!(
-            "{} : {} cur_seq: {}, pr_seq: {:?}",
-            i, ch, cur_seq, t_pr_seq
-        );
-
-        let mut m_lamda_close = |i: usize, output_char: char| {
-                let optional = stack_br.pop();
-                if !optional.is_none() && optional.unwrap().ch == output_char {
-                    let br = optional.unwrap();
-                    if t_pr_seq.end + 1 == br.pos && t_pr_seq.end != 0 {
-                        t_pr_seq.end = i;
-                    } else {
-                        t_pr_seq = SequenceDest{start: br.pos, end: i};
-                    }
-                    let t_cur_seq = s_concat_two[t_pr_seq.start..(t_pr_seq.end + 1)].to_string();
-                    if cur_seq.len() < t_cur_seq.len() {
-                        cur_seq = t_cur_seq;
-                    }
-                } else {
-                    //clear all
-                    stack_br.clear();
-                    if !t_pr_symbol.is_empty() && cur_seq.len() < t_pr_symbol.len() {
-                        cur_seq = t_pr_symbol.clone();
-                    }
-                    t_pr_symbol.clear();
-                }
-        };
-
-        match ch {
-            '(' | '{' | '[' => {
-                stack_br.push(SymbolPosition{
-                    pos: i - t_pr_symbol.len(), 
-                    ch: ch});
-                t_pr_symbol.clear();
-            }
-            ']' => {
-                m_lamda_close(i, '[');
-            }
-            ')' => {
-                m_lamda_close(i, '(');
-            }
-            '}' => {
-                m_lamda_close(i, '{');
-            }
-            _ => {
-                if t_pr_seq.end + 1 == i && t_pr_seq.end != 0 {
-                    info!("t_pr_seq {}", i);
-                    t_pr_seq.end = i;
-                    cur_seq = s_concat_two[t_pr_seq.start..(t_pr_seq.end + 1)].to_string();
-                    t_pr_symbol.clear();
-                } else {
-                    t_pr_symbol.push(ch);
-                }
-
-                info!("Symbol cur_seq {}", cur_seq);
-            }
-        }
-        if cur_seq.len() == s.len() || t_pr_symbol.len() == s.len() {
-            return "Infinite".to_string();
-        }
-        if i >= s.len() && stack_br.is_empty() && t_pr_symbol.is_empty() {
-            break;
-        }
-    }
-
-    if t_pr_symbol.len() != 0 {
-        if cur_seq.is_empty() {
-            cur_seq = t_pr_symbol;
-        }
-    }
-    cur_seq
+    let seq = Sequence::new(s.to_string());
+    seq.get_correct_sequence()
 }
 
 #[test]
 fn test25_seq() {
     assert_eq!(correct_sequence("[[]((]){}"), "[]");
 }
-
 
 #[test]
 fn test24_seq() {
@@ -255,5 +264,8 @@ fn test1_concat() {
 }
 
 fn main() {
-    println!("Sequence {} === kc({{z}}[bc])k",correct_sequence("}[bc])k)ab[])c(d)y())da((b)()))kc({z"));
+    println!(
+        "Sequence {} === kc({{z}}[bc])k",
+        correct_sequence("}[bc])k)ab[])c(d)y())da((b)()))kc({z")
+    );
 }
