@@ -7,6 +7,36 @@ struct Sequence {
     s: String,
 }
 
+macro_rules! close_bracket {
+    ($i:expr; $output_char:literal; $stack_br:expr; $previous_sequnce:expr; $current_sequnce:expr) => {
+        let optional = stack_br.pop();
+        if !optional.is_none() && optional.unwrap().ch == output_char {
+            let br = optional.unwrap();
+            if previous_sequnce.end + 1 == br.pos && previous_sequnce.end != 0 {
+                previous_sequnce.end = i;
+            } else {
+                previous_sequnce = SequenceDest {
+                    start: br.pos,
+                    end: i,
+                };
+            }
+            let previous_seq_len = previous_sequnce.end + 1 - previous_sequnce.start;
+            if current_sequnce.len() < previous_seq_len {
+                current_sequnce =
+                    s_concat_two[previous_sequnce.start..(previous_sequnce.end + 1)].to_string();
+            }
+        } else {
+            //clear all
+            stack_br.clear();
+            if !previous_symbol.is_empty() && current_sequnce.len() < previous_symbol.len() {
+                current_sequnce = previous_symbol.clone();
+            }
+            previous_symbol.clear();
+        }
+    };
+}
+
+
 impl Sequence {
     fn new(s: String) -> Sequence {
         Self { s }
@@ -20,32 +50,9 @@ impl Sequence {
         let mut stack_br: Vec<SymbolPosition> = Vec::new();
 
         for (i, ch) in s_concat_two.chars().enumerate() {
-
-            let mut m_lamda_close = |i: usize, output_char: char| {
-                let optional = stack_br.pop();
-                if !optional.is_none() && optional.unwrap().ch == output_char {
-                    let br = optional.unwrap();
-                    if previous_sequnce.end + 1 == br.pos && previous_sequnce.end != 0 {
-                        previous_sequnce.end = i;
-                    } else {
-                        previous_sequnce = SequenceDest {
-                            start: br.pos,
-                            end: i,
-                        };
-                    }
-                    let previous_seq_len = previous_sequnce.end + 1 - previous_sequnce.start;
-                    if current_sequnce.len() < previous_seq_len {
-                        current_sequnce = s_concat_two[previous_sequnce.start..(previous_sequnce.end + 1)].to_string();
-                    }
-                } else {
-                    //clear all
-                    stack_br.clear();
-                    if !previous_symbol.is_empty() && current_sequnce.len() < previous_symbol.len() {
-                        current_sequnce = previous_symbol.clone();
-                    }
-                    previous_symbol.clear();
-                }
-            };
+            // let mut m_lamda_close = |i: usize, output_char: char| {
+            //     close_bracket!(i; output_char; stack_br; previous_sequnce; current_sequnce);
+            // };
 
             match ch {
                 '(' | '{' | '[' => {
@@ -56,24 +63,28 @@ impl Sequence {
                     previous_symbol.clear();
                 }
                 ']' => {
-                    m_lamda_close(i, '[');
+                    // m_lamda_close(i, '[');
+                    close_bracket!(i; '['; stack_br; previous_sequnce; current_sequnce);
                 }
                 ')' => {
-                    m_lamda_close(i, '(');
+                    // m_lamda_close(i, '(');
+                    close_bracket!(i; '('; stack_br; previous_sequnce; current_sequnce);
                 }
                 '}' => {
-                    m_lamda_close(i, '{');
+                    // m_lamda_close(i, '{');
+                    close_bracket!(i; '{'; stack_br; previous_sequnce; current_sequnce);
                 }
                 _ => {
                     if previous_sequnce.end + 1 == i && previous_sequnce.end != 0 {
                         info!("t_pr_seq {}", i);
                         previous_sequnce.end = i;
-                        current_sequnce = s_concat_two[previous_sequnce.start..(previous_sequnce.end + 1)].to_string();
+                        current_sequnce = s_concat_two
+                            [previous_sequnce.start..(previous_sequnce.end + 1)]
+                            .to_string();
                         previous_symbol.clear();
                     } else {
                         previous_symbol.push(ch);
                     }
-
                 }
             }
             // return if found max possible sequence
