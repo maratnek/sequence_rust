@@ -243,7 +243,7 @@ fn test_seq_with_right_correct_brackets() {
 
 
 #[test]
-fn test_with_right_correct_seq() {
+fn test_seq_with_right_correct() {
     assert_eq!(correct_sequence("a{a}c{"), "a{a}c");
 }
 
