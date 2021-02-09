@@ -1,39 +1,29 @@
 ///
 /// considering that input data is correct
 /// considering symbol is little sequence
-use log::{debug, info};
+use log::{info};
+
+fn concat_sequence(s: &str) -> String {
+    let mut s_concat_two = s.to_string();
+    s_concat_two.push_str(&s);
+    s_concat_two
+}
+
+#[derive(Copy, Clone)]
+struct SymbolPosition {
+    pos: usize,
+    ch: char,
+}
+
+#[derive(Debug)]
+struct SequenceDest {
+    start: usize,
+    end: usize,
+}
+
 
 struct Sequence {
     s: String,
-}
-
-macro_rules! close_bracket {
-    ($i:expr; $output_char:literal; $stack_br:expr; $previous_sequnce:expr; $current_sequnce:expr) => {
-        let optional = stack_br.pop();
-        if !optional.is_none() && optional.unwrap().ch == output_char {
-            let br = optional.unwrap();
-            if previous_sequnce.end + 1 == br.pos && previous_sequnce.end != 0 {
-                previous_sequnce.end = i;
-            } else {
-                previous_sequnce = SequenceDest {
-                    start: br.pos,
-                    end: i,
-                };
-            }
-            let previous_seq_len = previous_sequnce.end + 1 - previous_sequnce.start;
-            if current_sequnce.len() < previous_seq_len {
-                current_sequnce =
-                    s_concat_two[previous_sequnce.start..(previous_sequnce.end + 1)].to_string();
-            }
-        } else {
-            //clear all
-            stack_br.clear();
-            if !previous_symbol.is_empty() && current_sequnce.len() < previous_symbol.len() {
-                current_sequnce = previous_symbol.clone();
-            }
-            previous_symbol.clear();
-        }
-    };
 }
 
 
@@ -43,16 +33,13 @@ impl Sequence {
     }
 
     fn get_correct_sequence(&self) -> String {
-        let s_concat_two = w_concat(&self.s);
+        let seq_concat = concat_sequence(&self.s);
         let mut current_sequnce = String::from("");
         let mut previous_symbol = String::from("");
         let mut previous_sequnce = SequenceDest { start: 0, end: 0 };
         let mut stack_br: Vec<SymbolPosition> = Vec::new();
 
-        for (i, ch) in s_concat_two.chars().enumerate() {
-            // let mut m_lamda_close = |i: usize, output_char: char| {
-            //     close_bracket!(i; output_char; stack_br; previous_sequnce; current_sequnce);
-            // };
+        for (i, ch) in seq_concat.chars().enumerate() {
 
             match ch {
                 '(' | '{' | '[' => {
@@ -63,22 +50,19 @@ impl Sequence {
                     previous_symbol.clear();
                 }
                 ']' => {
-                    // m_lamda_close(i, '[');
-                    close_bracket!(i; '['; stack_br; previous_sequnce; current_sequnce);
+                    Sequence::close_bracket(i, '[', &mut stack_br, &mut previous_sequnce, &mut current_sequnce, &mut previous_symbol, &s_concat_two);
                 }
                 ')' => {
-                    // m_lamda_close(i, '(');
-                    close_bracket!(i; '('; stack_br; previous_sequnce; current_sequnce);
+                    Sequence::close_bracket(i, '(', &mut stack_br, &mut previous_sequnce, &mut current_sequnce, &mut previous_symbol, &s_concat_two);
                 }
                 '}' => {
-                    // m_lamda_close(i, '{');
-                    close_bracket!(i; '{'; stack_br; previous_sequnce; current_sequnce);
+                    Sequence::close_bracket(i, '{', &mut stack_br, &mut previous_sequnce, &mut current_sequnce, &mut previous_symbol, &s_concat_two);
                 }
                 _ => {
                     if previous_sequnce.end + 1 == i && previous_sequnce.end != 0 {
                         info!("t_pr_seq {}", i);
                         previous_sequnce.end = i;
-                        current_sequnce = s_concat_two
+                        current_sequnce = seq_concat 
                             [previous_sequnce.start..(previous_sequnce.end + 1)]
                             .to_string();
                         previous_symbol.clear();
@@ -102,24 +86,37 @@ impl Sequence {
         }
         current_sequnce
     }
-}
 
-fn w_concat(s: &str) -> String {
-    let mut s_concat_two = s.to_string();
-    s_concat_two.push_str(&s);
-    s_concat_two
+fn close_bracket(i:usize, output_char:char, 
+        stack_br: &mut Vec<SymbolPosition>, previous_sequnce: &mut SequenceDest, current_sequnce: &mut String,
+        previous_symbol: &mut String, s_concat_two: &String)
+{
+        let optional = stack_br.pop();
+        if !optional.is_none() && optional.unwrap().ch == output_char {
+            let br = optional.unwrap();
+            if previous_sequnce.end + 1 == br.pos && previous_sequnce.end != 0 {
+                previous_sequnce.end = i;
+            } else {
+                previous_sequnce.start = br.pos;
+                previous_sequnce.end = i;
+            }
+            let previous_seq_len = previous_sequnce.end + 1 - previous_sequnce.start;
+            if current_sequnce.len() < previous_seq_len {
+                current_sequnce.clear();
+                current_sequnce.push_str(
+                    &mut s_concat_two[previous_sequnce.start..(previous_sequnce.end + 1)].to_string()
+                );
+            }
+        } else {
+            //clear all
+            stack_br.clear();
+            if !previous_symbol.is_empty() && current_sequnce.len() < previous_symbol.len() {
+                current_sequnce.clear();
+                current_sequnce.push_str(previous_symbol);
+            }
+            previous_symbol.clear();
+        }
 }
-
-#[derive(Copy, Clone)]
-struct SymbolPosition {
-    pos: usize,
-    ch: char,
-}
-
-#[derive(Debug)]
-struct SequenceDest {
-    start: usize,
-    end: usize,
 }
 
 fn correct_sequence(s: &str) -> String {
